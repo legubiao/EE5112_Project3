@@ -1,7 +1,7 @@
 %Parameters
-nDiscretize = 20; % number of discretized waypoint
-nPaths = 20; % number of sample paths
-convergenceThreshold = 0.1; % convergence threshhold
+nDiscretize = 20;           % number of discretized waypoint 路径点的数量
+nPaths = 20;                % number of sample paths 每次采样的粒子的数量
+convergenceThreshold = 0.1; % convergence threshhold 收敛阈值
 
 % Initial guess of joint angles theta is just linear interpolation of q0
 % and qT
@@ -12,6 +12,7 @@ theta=zeros(numJoints, nDiscretize);
 for k=1:length(q0)
     theta(k,:) = linspace(q0(k), qT(k), nDiscretize);
 end
+theta_animation = {};
 
 % by default, it loads the robot with the structure data format
 robot_struct = loadrobot(robot_name); 
@@ -49,20 +50,30 @@ while abs(Qtheta - QthetaOld) > convergenceThreshold
     tic
     %% TODO: Complete the following code. The needed functions are already given or partially given in the folder.
     %% TODO: Sample noisy trajectories
+    [theta_paths, em] = stompSamples(nPaths,Rinv,theta);
 
     %% TODO: Calculate Local trajectory cost for each sampled trajectory
     % variable declaration (holder for the cost):
     Stheta = zeros(nPaths, nDiscretize);
-
+    for i=1:nPaths
+        [Stheta(i,:), ~] = stompTrajCost(robot_struct, theta_paths{i}, R, voxel_world);
+    end
     
     %% TODO: Given the local traj cost, update local trajectory probability
-
+    probabilities = softmax(Stheta');
     
     %% TODO: Compute delta theta (aka gradient estimator, the improvement of the delta)
+    dTheata = stompDTheta(probabilities,em);
 
+    dtheta_smoothed = zeros(size(theta));
+    dtheta_smoothed(:, 2:end-1) = (M * dTheata(:, 2:end-1)')';
+
+    theta = theta + dtheta_smoothed ;
+    theta_animation{end+1} = theta;
 
     %% TODO: Compute the cost of the new trajectory
- 
+    [Stheta, Qtheta] = stompTrajCost(robot_struct, theta, R, voxel_world);
+    
     toc
 
     Q_time = [Q_time Qtheta];
@@ -110,7 +121,7 @@ isTrajectoryInCollision = any(inCollision)
 
 
 %% Plot training iteration process
-enableVideoTraining = 0;
+enableVideoTraining = 1;
 
 
 
@@ -145,7 +156,7 @@ close(v);
 
 
 %% Plot path
-enableVideo = 0;
+enableVideo = 1;
 if enableVideo == 1
     v = VideoWriter('KinvaGen3_wEEConY3.avi');
     v.FrameRate =2;
