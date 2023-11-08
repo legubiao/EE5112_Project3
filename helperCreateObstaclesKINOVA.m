@@ -5,6 +5,7 @@ voxel_size = [0.02, 0.02, 0.02];  % unit: m
 % Binary map: all free space initially, 
 binary_world = zeros(Env_size(2, 1) / voxel_size(1), Env_size(2, 2) / voxel_size(2), Env_size(2, 3) / voxel_size(3));
 % binary_world_offset = Env_size(1, :)./ voxel_size;
+
 %% XYZ metric representation (in meter) for each voxel 
 % !!!!Watch out for the useage of meshgrid:
 % [X,Y,Z] = meshgrid(x,y,z) returns 3-D grid coordinates defined by the 

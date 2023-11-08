@@ -1,7 +1,7 @@
 %Parameters
 nDiscretize = 20;           % number of discretized waypoint 路径点的数量
 nPaths = 20;                % number of sample paths 每次采样的粒子的数量
-convergenceThreshold = 0.1; % convergence threshhold 收敛阈值
+convergenceThreshold = 0.01; % convergence threshhold 收敛阈值
 
 % Initial guess of joint angles theta is just linear interpolation of q0
 % and qT
@@ -40,7 +40,6 @@ RAR_time = [];
 
 [~, Qtheta] = stompTrajCost(robot_struct, theta, R, voxel_world);
 QthetaOld = 0;
-
 iter=0;
 while abs(Qtheta - QthetaOld) > convergenceThreshold
     iter=iter+1;
