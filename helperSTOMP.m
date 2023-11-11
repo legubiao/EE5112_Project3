@@ -1,3 +1,5 @@
+addpath('mr')
+
 %Parameters
 nDiscretize = 20;           % number of discretized waypoint 路径点的数量
 nPaths = 20;                % number of sample paths 每次采样的粒子的数量
