@@ -10,6 +10,6 @@ dtheta = zeros(nJoints, nDiscretize);
 %% TODO: iterate over all joints to compute dtheta: (complete your code according to the STOMP algorithm)
 for i = 1:nJoints
     for t = 1:nDiscretize
-        dtheta(i, t) = sum(trajProb(:, t) .* em{i}(:, t)) / sum(trajProb(:, t));
+        dtheta(i, t) = sum(trajProb(:, t) .* em{i}(:, t));
     end
 end

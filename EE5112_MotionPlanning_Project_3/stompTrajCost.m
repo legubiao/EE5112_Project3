@@ -12,8 +12,8 @@ qo_cost = zeros(1, nDiscretize);
 qc_cost = zeros(1, nDiscretize);
 
 % Get the coordinates of joints in World frame 
-[X, ~] = PoE_updateJointsWorldPosition(robot_struct, theta(:, 1));
-%[X, ~] = updateJointsWorldPosition(robot_struct, theta(:, 1));
+% [X, ~] = PoE_updateJointsWorldPosition(robot_struct, theta(:, 1));
+[X, ~] = updateJointsWorldPosition(robot_struct, theta(:, 1));
 % Construct the spheres around the robot manipulator for collision
 % avoidance
 [sphere_centers,radi] = stompRobotSphere(X);
@@ -25,8 +25,8 @@ for i = 2 : nDiscretize
     sphere_centers_prev = sphere_centers;
     % Calculate the kinematics of the manipulator, given the
     % configuration theta values at different time (i=2:nDiscretize)
-    [X, ~] = PoE_updateJointsWorldPosition(robot_struct, theta(:, 1));
-    %[X, ~] = updateJointsWorldPosition(robot_struct, theta(:, i));
+    % [X, ~] = PoE_updateJointsWorldPosition(robot_struct, theta(:, 1));
+    [X, ~] = updateJointsWorldPosition(robot_struct, theta(:, i));
     [sphere_centers, radi] = stompRobotSphere(X);
     % xb: 3D workspace position of sphere b at the current time
     % Approximate the speed (xb_dot) using the finite difference of the current and

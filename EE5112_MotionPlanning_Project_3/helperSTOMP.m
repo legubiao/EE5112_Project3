@@ -12,7 +12,7 @@ theta=zeros(numJoints, nDiscretize);
 for k=1:length(q0)
     theta(k,:) = linspace(q0(k), qT(k), nDiscretize);
 end
-theta_animation = {};
+
 % by default, it loads the robot with the structure data format
 robot_struct = loadrobot(robot_name); 
 
@@ -39,6 +39,7 @@ RAR_time = [];
 
 [~, Qtheta] = stompTrajCost(robot_struct, theta, R, voxel_world);
 QthetaOld = 0;
+theta_animation = {};
 
 iter=0;
 while abs(Qtheta - QthetaOld) > convergenceThreshold
@@ -49,26 +50,24 @@ while abs(Qtheta - QthetaOld) > convergenceThreshold
     tic
     %% TODO: Complete the following code. The needed functions are already given or partially given in the folder.
     %% TODO: Sample noisy trajectories
-    [theta_samples, em] = stompSamples(nPaths,Rinv,theta);
+    [theta_paths, em] = stompSamples(nPaths,Rinv,theta);
+
     %% TODO: Calculate Local trajectory cost for each sampled trajectory
     % variable declaration (holder for the cost):
     Stheta = zeros(nPaths, nDiscretize);
-    for i =1:nPaths
-        [~,Stheta(i,:)]=stompTrajCost(robot_struct,theta_samples{i},R,voxel_world);
+    for i=1:nPaths
+        [Stheta(i,:), ~] = stompTrajCost(robot_struct, theta_paths{i}, R, voxel_world);
     end
-
     
     %% TODO: Given the local traj cost, update local trajectory probability
+    trajProb = stompUpdateProb(Stheta);
     
-    Probility=stompUpdateProb(Stheta);
     %% TODO: Compute delta theta (aka gradient estimator, the improvement of the delta)
-    delta_theta = stompDTheta(Probility,em);
-
+    dtheta = stompDTheta(trajProb, em);
 
     %% TODO: Compute the cost of the new trajectory
-    [theta, dtheta_smoothed] = stompUpdateTheta(theta, delta_theta, M);
-    
-    [~, Qtheta] = stompTrajCost(robot_struct, theta, R, voxel_world); 
+    [theta, dtheta_smoothed] = stompUpdateTheta(theta, dtheta, M);
+    [~, Qtheta] = stompTrajCost(robot_struct, theta, R, voxel_world);
     theta_animation{end+1} = theta;
 
     toc
@@ -122,7 +121,7 @@ enableVideoTraining = 1;
 
 
 
-v = VideoWriter('FrankaEmikaPanda_Training.avi');
+v = VideoWriter('FrankaEmikaPanda5_Training.avi');
 v.FrameRate = 15;
 open(v);
 
@@ -153,9 +152,9 @@ close(v);
 
 
 %% Plot path
-enableVideo = 0;
+enableVideo = 1;
 if enableVideo == 1
-    v = VideoWriter('FrankaEmikaPanda_wEEConY3.avi');
+    v = VideoWriter('FrankaEmikaPanda5_wEEConY3.avi');
     v.FrameRate =2;
     open(v);
 
