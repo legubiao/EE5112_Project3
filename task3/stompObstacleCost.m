@@ -1,6 +1,6 @@
 function cost = stompObstacleCost(sphere_centers,radius,voxel_world,vel)
 
-safety_margin = 0.08; % the safety margin distance, unit: meter
+safety_margin = 0.05; % the safety margin distance, unit: meter
 cost = 0;
 % signed distance function of the world
 voxel_world_sEDT = voxel_world.sEDT;
