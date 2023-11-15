@@ -32,7 +32,7 @@ for k=1:nJoints
     currentJoint = robot.Bodies{1,k}.Joint;
     M = M * currentJoint.JointToParentTransform;
     omega = M(1:3,1:3) * currentJoint.JointAxis';
-    v = -cross(omega,M(1:3,4));
+    v = cross(M(1:3,4),omega);
     Slist(1:3,k) = omega;
     Slist(4:6,k) = v;
 end

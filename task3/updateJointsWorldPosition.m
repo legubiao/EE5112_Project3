@@ -53,7 +53,7 @@ if usePoE
         M = M * currentJoint.JointToParentTransform;
         Mlist{k} = M;
         omega = M(1:3,1:3) * currentJoint.JointAxis';
-        v = -cross(omega,M(1:3,4));
+        v = cross(M(1:3,4),omega);
         Slist(1:3,k) = omega;
         Slist(4:6,k) = v;
     end
