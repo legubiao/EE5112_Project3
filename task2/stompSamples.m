@@ -21,12 +21,11 @@ mu=zeros(1,length(sigma));
 for m = 1 : nJoints
     % Each joint is sampled independently.
     % The starting q0 and final qT are fixed, so set the sample to 0.
-    
-    % Create a multivariate Gaussian distribution with zero mean and the provided covariance matrix
-    em{m} = mvnrnd(mu, sigma, nSamplePaths);
-    em{m} = [zeros(nSamplePaths, 1), em{m}, zeros(nSamplePaths, 1)];
-end
+    % Sample from multivariable Gaussian distribution
 
+   em{m} = mvnrnd(mu, sigma, nSamplePaths);
+   em{m} = [zeros(nSamplePaths, 1), em{m}, zeros(nSamplePaths, 1)];
+end
 
 %% Regroup it by samples
 emk = [em{:}];

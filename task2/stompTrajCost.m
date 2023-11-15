@@ -11,12 +11,13 @@ qo_cost = zeros(1, nDiscretize);
 % Constraint costs
 qc_cost = zeros(1, nDiscretize);
 
-% Get the coordinates of joints in World frame 
-% [X, ~] = PoE_updateJointsWorldPosition(robot_struct, theta(:, 1));
+% Get the coordinates of joints in World frame
 [X, ~] = updateJointsWorldPosition(robot_struct, theta(:, 1));
+
 % Construct the spheres around the robot manipulator for collision
 % avoidance
 [sphere_centers,radi] = stompRobotSphere(X);
+
 % Initial velocity at the sphere centers around the manipulator is 0
 vel = zeros(length(sphere_centers), 1);
 qo_cost(1) = stompObstacleCost(sphere_centers,radi, voxel_world, vel);
@@ -25,7 +26,6 @@ for i = 2 : nDiscretize
     sphere_centers_prev = sphere_centers;
     % Calculate the kinematics of the manipulator, given the
     % configuration theta values at different time (i=2:nDiscretize)
-    % [X, ~] = PoE_updateJointsWorldPosition(robot_struct, theta(:, 1));
     [X, ~] = updateJointsWorldPosition(robot_struct, theta(:, i));
     [sphere_centers, radi] = stompRobotSphere(X);
     % xb: 3D workspace position of sphere b at the current time
@@ -35,6 +35,7 @@ for i = 2 : nDiscretize
     qo_cost(i) = stompObstacleCost(sphere_centers,radi, voxel_world, vel);
     
     %% TODO: Define your qc_cost to add constraint on the end-effector
+    % 定义约束成本，例如，机械臂末端必须保持水平
     qc_cost = 0;
 end
 

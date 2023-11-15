@@ -1,7 +1,7 @@
 %Parameters
-nDiscretize = 20; % number of discretized waypoint
-nPaths = 20; % number of sample paths
-convergenceThreshold = 0.1; % convergence threshhold
+nDiscretize = 20;           % number of discretized waypoint 路径点的数量
+nPaths = 20;                % number of sample paths 每次采样的粒子的数量
+convergenceThreshold = 0.01; % convergence threshhold 收敛阈值
 
 % Initial guess of joint angles theta is just linear interpolation of q0
 % and qT
@@ -12,6 +12,7 @@ theta=zeros(numJoints, nDiscretize);
 for k=1:length(q0)
     theta(k,:) = linspace(q0(k), qT(k), nDiscretize);
 end
+theta_animation = {};
 
 % by default, it loads the robot with the structure data format
 robot_struct = loadrobot(robot_name); 
@@ -39,8 +40,6 @@ RAR_time = [];
 
 [~, Qtheta] = stompTrajCost(robot_struct, theta, R, voxel_world);
 QthetaOld = 0;
-theta_animation = {};
-
 iter=0;
 while abs(Qtheta - QthetaOld) > convergenceThreshold
     iter=iter+1;
@@ -60,16 +59,20 @@ while abs(Qtheta - QthetaOld) > convergenceThreshold
     end
     
     %% TODO: Given the local traj cost, update local trajectory probability
-    trajProb = stompUpdateProb(Stheta);
+    probabilities = softmax(Stheta');
     
     %% TODO: Compute delta theta (aka gradient estimator, the improvement of the delta)
-    dtheta = stompDTheta(trajProb, em);
+    dTheata = stompDTheta(probabilities,em);
 
-    %% TODO: Compute the cost of the new trajectory
-    [theta, dtheta_smoothed] = stompUpdateTheta(theta, dtheta, M);
-    [~, Qtheta] = stompTrajCost(robot_struct, theta, R, voxel_world);
+    dtheta_smoothed = zeros(size(theta));
+    dtheta_smoothed(:, 2:end-1) = (M * dTheata(:, 2:end-1)')';
+
+    theta = theta + dtheta_smoothed ;
     theta_animation{end+1} = theta;
 
+    %% TODO: Compute the cost of the new trajectory
+    [Stheta, Qtheta] = stompTrajCost(robot_struct, theta, R, voxel_world);
+    
     toc
 
     Q_time = [Q_time Qtheta];
@@ -121,7 +124,7 @@ enableVideoTraining = 1;
 
 
 
-v = VideoWriter('KinvaGen3_Training.avi');
+v = VideoWriter('KukaIiwa7_Training.avi');
 v.FrameRate = 15;
 open(v);
 
@@ -131,9 +134,10 @@ if enableVideoTraining == 1
     theta_animation_tmp = theta_animation(~cellfun('isempty',theta_animation));
     nTraining = length(theta_animation_tmp);
     for k=0:5:nTraining
-        
+       
         UpdatedText = ['Iteration = ',num2str(k)];
         set(htext,'String',UpdatedText)
+
         if k+1 > length(theta_animation_tmp)
             theta_tmp = theta_animation_tmp{k};
         else
@@ -158,7 +162,7 @@ close(v);
 %% Plot path
 enableVideo = 1;
 if enableVideo == 1
-    v = VideoWriter('KinvaGen3_wEEConY3.avi');
+    v = VideoWriter('KukaIiwa7_wEEConY3.avi');
     v.FrameRate =2;
     open(v);
 
@@ -188,5 +192,4 @@ end
 %% save data
 filename = ['Theta_nDisc', num2str(nDiscretize),'_nPaths_', num2str(nPaths), '.mat'];
 save(filename,'theta')
-
 
