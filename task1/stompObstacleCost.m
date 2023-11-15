@@ -13,7 +13,8 @@ idx = ceil((sphere_centers-env_corner_vec)./voxel_world.voxel_size);
 
 %% TODO: complete the following code according to Eq (13) in the STOMP conference paper.
 try
-    cost_array = max(radius + safety_margin - voxel_world_sEDT(sub2ind(world_size, idx(:,1), idx(:,2), idx(:,3))), 0).*vel;
+    sDist = voxel_world_sEDT(sub2ind(world_size, idx(:,1), idx(:,2), idx(:,3)));
+    cost_array = max(0, radius + safety_margin - sDist).*vel;
     cost = sum(cost_array);
 catch  % for debugging
     idx = ceil((sphere_centers-env_corner_vec)./voxel_world.voxel_size);
