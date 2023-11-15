@@ -21,7 +21,7 @@ for k=1:size(X,1)
     % number of spheres used to cover the kth link
     rad = 0.05;  % radius of the sphere, tuning parameters 
     % calculate the number of shperes to cover the link
-    nSpheres = ceil(norm(child_joint_poisition-parent_joint_position)/rad)+1; % one sphere every 0.05m
+    nSpheres = ceil(norm(child_joint_poisition-parent_joint_position)/rad - 1e-8)+1; % one sphere every 0.05m
     % Calculate the centers of the spheres
     center_cell_k = arrayfun(@(x1, x2) linspace(x1,x2,nSpheres), parent_joint_position', child_joint_poisition','UniformOutput', false);
     % xyz coordinates of each sphere

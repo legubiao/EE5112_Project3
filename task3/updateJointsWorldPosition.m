@@ -25,14 +25,31 @@ nJoints = length(theta);
 T = cell(1,nJoints);
 X = zeros(nJoints, 4); 
 
+first_joint = 1;
+for i=1:robot_struct.NumBodies
+   joint = robot_struct.Bodies{1,i}.Joint;
+   if (joint.Type ~= "fixed")
+       first_joint = i;
+       break
+   end
+end
+
 usePoE = true;
+comparePoE = false;
 
 if usePoE
     M = eye(4);
     Slist = zeros(6,nJoints);
     Mlist = cell(1,nJoints);
+    if (first_joint > 1)
+        for k = 1:first_joint-1
+            currentJoint = robot_struct.Bodies{1,k}.Joint;
+            M = M * currentJoint.JointToParentTransform;
+        end
+    end
+
     for k=1:nJoints
-        currentJoint = robot_struct.Bodies{1,k}.Joint;
+        currentJoint = robot_struct.Bodies{1,k + first_joint - 1}.Joint;
         M = M * currentJoint.JointToParentTransform;
         Mlist{k} = M;
         omega = M(1:3,1:3) * currentJoint.JointAxis';
@@ -54,6 +71,14 @@ if usePoE
 
     T{nJoints} = T_temp;
     X(nJoints,:) =  T{nJoints}(1:4,4)';
+
+    if comparePoE
+        T_compare = cell(1,nJoints);
+        for k=1:nJoints
+            T_compare{k} = getTransform(robot_struct, tConfiguration, robot_struct.BodyNames{k+first_joint - 1});
+        end
+    end
+
     
 else
     for k=1:nJoints
@@ -63,7 +88,7 @@ else
         % getTransform can only takes in structure array Configuration
         %% TODO:
         % 使用matlab自带的getTransform函数，直接根据机器人结构和各个关节的角度，计算各个frame的T矩阵
-        T{k} = getTransform(robot_struct, tConfiguration, robot_struct.BodyNames{k});
+        T{k}=getTransform(robot_struct, tConfiguration, robot_struct.BodyNames{k+first_joint - 1});
         % Get joint's world coordinates
         X(k,:) =  T{k}(1:4,4)';
     end

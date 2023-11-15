@@ -25,13 +25,22 @@ nJoints = length(theta);
 T = cell(1,nJoints);
 X = zeros(nJoints, 4); 
 
+first_joint = 1;
+for i=1:robot_struct.NumBodies
+   joint = robot_struct.Bodies{1,i}.Joint;
+   if (joint.Type ~= "fixed")
+       first_joint = i;
+       break
+   end
+end
+
 for k=1:nJoints
     % get the homegeneous transformation from kth joint's frame to the
     % base frame
     % Use the Matlab built-in function getTransfrom to obtain the pose T
     % getTransform can only takes in structure array Configuration
     %% TODO:
-    T{k}=getTransform(robot_struct, tConfiguration, robot_struct.BodyNames{k});
+    T{k}=getTransform(robot_struct, tConfiguration, robot_struct.BodyNames{k+first_joint - 1});
     % Get joint's world coordinates
     X(k,:)=T{k}(1:4,4)';
 end
