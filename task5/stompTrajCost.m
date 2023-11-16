@@ -35,13 +35,13 @@ for i = 2 : nDiscretize
     %% TODO: Define your qc_cost to add constraint on the end-effector
     end_constrain=true;
     if end_constrain==true
-        desired_orientation = [0, 0, -1]; % 期望的直立方向
-        % 计算末端执行器当前方向
+        desired_orientation = [0, 0, -1]; % desired
+        % current 
         current_orientation = calculateEndEffectorOrientation(T);
-        % 计算方向偏差
+        % deviation
         angle_deviation = acos(dot(desired_orientation, current_orientation) / ...
         (norm(desired_orientation) * norm(current_orientation)));
-        % 将偏差角度的平方作为额外成本
+        % cost
         weight_factor=1000;
         qc_cost(i) = weight_factor * angle_deviation^2;
     else
@@ -59,13 +59,8 @@ Qtheta = sum(Stheta) + 1/2 * sum(theta * R * theta', "all");
 end
 
 function current_orientation = calculateEndEffectorOrientation(T)
-    % 假设 T 是一个从每个关节框架到基础框架的齐次变换数组
-    % 末端执行器的变换矩阵是数组的最后一个元素
     end_effector_transform = T{end};
 
-    % 从变换矩阵中提取 y 轴的方向
-    % MATLAB 中的变换矩阵是 4x4 的，其中前三列分别是 x, y, z 轴的方向，第四列是位置
-    % 我们需要第二列，即 y 轴的方向
     current_orientation = end_effector_transform(1:3, 3);
 end
     
